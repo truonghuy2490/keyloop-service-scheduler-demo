@@ -3,13 +3,17 @@ package com.keyloop.scheduler.application.abstraction.dataaccess;
 import java.util.List;
 import java.util.Optional;
 
-public interface BaseRepository<T, ID> {
+import com.keyloop.scheduler.application.common.pagination.PagedList;
 
-    Optional<T> findById(ID id);
+public interface BaseRepository<D, ID> {
 
-    List<T> findAll();
+    Optional<D> findById(ID id);
 
-    T save(T entity);
+    List<D> findAll();
+
+    PagedList<D> findAll(int pageNumber, int pageSize);
+
+    D save(D domain);
 
     void deleteById(ID id);
 

@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.keyloop.scheduler.application.abstraction.dataaccess.BaseRepository;
+import com.keyloop.scheduler.application.common.pagination.PagedList;
 import com.keyloop.scheduler.application.common.result.ErrorDetails;
 import com.keyloop.scheduler.application.common.result.Result;
 import com.keyloop.scheduler.domain.entity.Appointment;
@@ -20,33 +22,67 @@ public class Handler {
 
     private final BaseRepository<Appointment, UUID> appointmentRepository;
 
-    public Handler(BaseRepository<Appointment, UUID> appointmentRepository) {
+    public Handler(
+            BaseRepository<Appointment, UUID> appointmentRepository
+    ) {
         this.appointmentRepository = appointmentRepository;
     }
 
-    public Result<List<Response>> handle(Query query) {
+    public Result<PagedList<Response>> handle(Query request) {
 
-        logger.debug("Retrieving all appointments.");
+        logger.debug("Retrieving appointments.");
+        
+        int pageNumber = request.pageNumber();
+        int pageSize = request.pageSize();
 
-        List<Appointment> appointments = appointmentRepository.findAll();
+        // 1. Retrieve paginated appointments
+        PagedList<Appointment> appointments;
 
-        if (appointments == null) {
-            logger.error("Appointment repository returned null.");
+        try {
+                appointments = appointmentRepository.findAll(
+                        pageNumber,
+                        pageSize
+                );
+        } catch (DataAccessException ex) {
+                logger.error("Failed to retrieve appointments from database.", ex);
 
-            return Result.failure(
-                    new ErrorDetails(
-                            List.of(Errors.APPOINTMENT_RETRIEVAL_FAILED)
-                    )
-            );
+                return Result.failure(
+                        new ErrorDetails(
+                                List.of(Errors.APPOINTMENT_RETRIEVAL_FAILED)
+                        )
+                );
         }
 
-        List<Response> response = appointments.stream()
+        if (appointments.items().isEmpty()) {
+                logger.info("No appointments found.");
+
+                return Result.success(
+                        PagedList.create(
+                                List.of(),
+                                0,
+                                pageNumber,
+                                pageSize
+                        )
+                );
+        }
+
+        // 2. Map Domain to Response
+        List<Response> items = appointments.items()
+                .stream()
                 .map(Response::from)
                 .toList();
 
+        // 3. Return paginated response
+        PagedList<Response> response = PagedList.create(
+                items,
+                appointments.totalCount(),
+                pageNumber,
+                pageSize
+        );
+
         logger.info(
                 "Successfully retrieved {} appointments.",
-                response.size()
+                items.size()
         );
 
         return Result.success(response);
