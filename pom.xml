@@ -109,6 +109,52 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.13</version>
+
+				<executions>
+					<!-- Collect test coverage data -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+
+					<!-- Generate coverage report -->
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<!-- Application Layer -->
+								<include>com/keyloop/scheduler/application/**</include>
+
+								<!-- Presentation Layer -->
+								<include>com/keyloop/scheduler/presentation/**</include>
+							</includes>
+
+							<excludes>
+								<!-- Exclude Application -->
+								<exclude>com/keyloop/scheduler/application/common/pagination/**</exclude>
+								<exclude>com/keyloop/scheduler/application/common/result/**</exclude>
+
+								<!-- Exclude Presentation -->
+								<exclude>com/keyloop/scheduler/presentation/utility/**</exclude>
+								<exclude>com/keyloop/scheduler/presentation/filter/**</exclude>
+								<exclude>com/keyloop/scheduler/presentation/config/**</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 
