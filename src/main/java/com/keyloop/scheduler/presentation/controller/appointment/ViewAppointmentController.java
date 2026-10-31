@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,8 @@ public class ViewAppointmentController {
 
     private final Handler handler;
 
-    public ViewAppointmentController(Handler handler) {
+    public ViewAppointmentController( 
+        @Qualifier("viewAppointmentHandler") Handler handler) {
         this.handler = handler;
     }
 

@@ -14,7 +14,7 @@ import com.keyloop.scheduler.application.common.result.ErrorDetails;
 import com.keyloop.scheduler.application.common.result.Result;
 import com.keyloop.scheduler.domain.entity.Appointment;
 
-@Service
+@Service("viewAppointmentHandler")
 public class Handler {
 
     private static final Logger logger =
@@ -59,7 +59,7 @@ public class Handler {
                 return Result.success(
                         PagedList.create(
                                 List.of(),
-                                0,
+                                appointments.totalCount(),
                                 pageNumber,
                                 pageSize
                         )
