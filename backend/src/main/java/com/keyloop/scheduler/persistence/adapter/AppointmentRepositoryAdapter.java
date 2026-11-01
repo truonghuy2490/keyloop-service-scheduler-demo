@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import com.keyloop.scheduler.application.common.pagination.PagedList;
 import com.keyloop.scheduler.domain.entity.Appointment;
 import com.keyloop.scheduler.persistence.entity.AppointmentJpaEntity;
 import com.keyloop.scheduler.persistence.repository.AppointmentJpaRepository;
