@@ -355,3 +355,7 @@ Tôi đề xuất bạn chọn mô hình Service-first, Date-second, Availabilit
 Một điểm đáng chú ý khi trình bày Scenario A trong interview: Bạn không chỉ xây dựng CRUD Appointment mà đang giải quyết bài toán Resource Scheduling, trong đó nhiều tài nguyên phải được phân bổ đồng thời mà không xảy ra double booking.
 
 Đây chính là phần có giá trị technical nhất của project này.
+
+$env:JAVA_TOOL_OPTIONS = "-Duser.timezone=UTC"  
+java -XshowSettings:properties -version 2>&1 | Select-String "user.timezone" 
+
