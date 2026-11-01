@@ -1,7 +1,5 @@
 package com.keyloop.scheduler.presentation.controller.appointment;
 
-import java.util.UUID;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -74,3 +72,9 @@ public class ViewAppointmentByIdController {
         return ErrorOrExtensions.toResponse(result);
     }
 }
+// optimistic lock
+// permisstic lock
+// @Transaction 
+// isolation in spring boot
+// @Builder 
+// proxy pattern

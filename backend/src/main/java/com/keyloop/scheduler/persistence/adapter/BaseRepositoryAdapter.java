@@ -1,23 +1,22 @@
 package com.keyloop.scheduler.persistence.adapter;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.keyloop.scheduler.application.abstraction.dataaccess.BaseRepository;
 import com.keyloop.scheduler.application.common.pagination.PagedList;
 
-import java.util.List;
-import java.util.Optional;
-
 public abstract class BaseRepositoryAdapter<D, E, ID>
         implements BaseRepository<D, ID> {
 
     protected final JpaRepository<E, ID> jpaRepository;
 
-    protected BaseRepositoryAdapter(
-            JpaRepository<E, ID> jpaRepository
-    ) {
+    protected BaseRepositoryAdapter(JpaRepository<E, ID> jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 
@@ -42,11 +41,22 @@ public abstract class BaseRepositoryAdapter<D, E, ID>
     @Override
     public PagedList<D> findAll(int pageNumber, int pageSize) {
 
-        Pageable pageable =
-                org.springframework.data.domain.PageRequest.of(
-                        pageNumber - 1,
-                        pageSize
-                );
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException(
+                    "Page number must be greater than 0"
+            );
+        }
+
+        if (pageSize < 1) {
+            throw new IllegalArgumentException(
+                    "Page size must be greater than 0"
+            );
+        }
+
+        Pageable pageable = PageRequest.of(
+                pageNumber - 1,
+                pageSize
+        );
 
         Page<E> page = jpaRepository.findAll(pageable);
 
@@ -65,6 +75,13 @@ public abstract class BaseRepositoryAdapter<D, E, ID>
 
     @Override
     public D save(D domain) {
+
+        if (domain == null) {
+            throw new IllegalArgumentException(
+                    "Domain entity cannot be null"
+            );
+        }
+
         E entity = toPersistence(domain);
 
         E savedEntity = jpaRepository.save(entity);

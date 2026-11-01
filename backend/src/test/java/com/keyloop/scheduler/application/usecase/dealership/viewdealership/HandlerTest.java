@@ -21,7 +21,7 @@ import com.keyloop.scheduler.application.common.result.Result;
 import com.keyloop.scheduler.domain.entity.Dealership;
 
 @ExtendWith(MockitoExtension.class)
-class TestHandler {
+class HandlerTest {
 
     @Mock
     private BaseRepository<Dealership, UUID> dealershipRepository;

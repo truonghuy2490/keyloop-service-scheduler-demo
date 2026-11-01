@@ -1,54 +1,96 @@
 package com.keyloop.scheduler.domain.entity;
 
 import com.keyloop.scheduler.domain.common.SoftDeletableCreatedEntity;
+
 import java.time.LocalTime;
 import java.util.UUID;
 
 public class DealershipBusinessHours extends SoftDeletableCreatedEntity {
+
     private UUID dealershipId;
     private Short dayOfWeek;
-    private boolean isClosed;
+    private boolean closed;
     private LocalTime opensAt;
     private LocalTime closesAt;
-    public DealershipBusinessHours() {
-    }
-    public UUID getDealershipId() {
-        return dealershipId;
+
+    protected DealershipBusinessHours() {
     }
 
-    public void setDealershipId(UUID dealershipId) {
-        this.dealershipId = dealershipId;
+    private DealershipBusinessHours(Builder builder) {
+        super(builder);
+
+        this.dealershipId = builder.dealershipId;
+        this.dayOfWeek = builder.dayOfWeek;
+        this.closed = builder.closed;
+        this.opensAt = builder.opensAt;
+        this.closesAt = builder.closesAt;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder
+            extends SoftDeletableCreatedEntity.Builder<Builder> {
+
+        private UUID dealershipId;
+        private Short dayOfWeek;
+        private boolean closed;
+        private LocalTime opensAt;
+        private LocalTime closesAt;
+
+        public Builder dealershipId(UUID dealershipId) {
+            this.dealershipId = dealershipId;
+            return this;
+        }
+
+        public Builder dayOfWeek(Short dayOfWeek) {
+            this.dayOfWeek = dayOfWeek;
+            return this;
+        }
+
+        public Builder closed(boolean closed) {
+            this.closed = closed;
+            return this;
+        }
+
+        public Builder opensAt(LocalTime opensAt) {
+            this.opensAt = opensAt;
+            return this;
+        }
+
+        public Builder closesAt(LocalTime closesAt) {
+            this.closesAt = closesAt;
+            return this;
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+
+        public DealershipBusinessHours build() {
+            return new DealershipBusinessHours(this);
+        }
+    }
+
+    public UUID getDealershipId() {
+        return dealershipId;
     }
 
     public Short getDayOfWeek() {
         return dayOfWeek;
     }
 
-    public void setDayOfWeek(Short dayOfWeek) {
-        this.dayOfWeek = dayOfWeek;
-    }
-
     public boolean getIsClosed() {
-        return isClosed;
-    }
-
-    public void setIsClosed(boolean isClosed) {
-        this.isClosed = isClosed;
+        return closed;
     }
 
     public LocalTime getOpensAt() {
         return opensAt;
     }
 
-    public void setOpensAt(LocalTime opensAt) {
-        this.opensAt = opensAt;
-    }
-
     public LocalTime getClosesAt() {
         return closesAt;
-    }
-
-    public void setClosesAt(LocalTime closesAt) {
-        this.closesAt = closesAt;
     }
 }

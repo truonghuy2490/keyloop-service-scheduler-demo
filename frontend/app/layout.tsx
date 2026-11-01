@@ -1,10 +1,15 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
 import ReduxProvider from "@/lib/redux/providers";
 
 export const metadata: Metadata = {
-  title: "Service Scheduler",
-  description: "Automotive Service Appointment Scheduler",
+  title: {
+    default: "Service Scheduler | Keyloop",
+    template: "%s | Service Scheduler",
+  },
+  description:
+    "Automotive Service Appointment Scheduling Platform",
 };
 
 export default function RootLayout({
@@ -13,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="keyloop">
       <body>
         <ReduxProvider>{children}</ReduxProvider>
       </body>

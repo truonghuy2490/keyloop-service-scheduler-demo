@@ -57,6 +57,7 @@ After successful validation, create a persistent appointment record associating 
 | Method | Endpoint | Description | Status |
 | ------ | -------- | ----------- | ------ |
 | GET | `/api/v1/dealerships` | List all dealerships | ✅ Completed |
+| GET | `/api/v1/dealerships/{id}` | View a dealership details | ✅ Completed |
 | GET | `/api/v1/services` | List available services | Planned |
 | GET | `/api/v1/customers/{id}/vehicles` | List customer's vehicles | Planned |
 | POST | `/api/v1/appointments` | Create an appointment | Planned |

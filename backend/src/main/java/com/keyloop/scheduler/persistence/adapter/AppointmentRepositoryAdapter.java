@@ -22,61 +22,57 @@ public class AppointmentRepositoryAdapter
 
     @Override
     protected Appointment toDomain(AppointmentJpaEntity source) {
+
         if (source == null) {
             return null;
         }
 
-        Appointment target = new Appointment();
+        return Appointment.builder()
+                .id(source.getId())
+                .isDeleted(source.isDeleted())
+                .createdAt(source.getCreatedAt())
+                .updatedAt(source.getUpdatedAt())
 
-        // Inherited properties
-        target.setId(source.getId());
-        target.setIsDeleted(source.isDeleted());
-        target.setCreatedAt(source.getCreatedAt());
-        target.setUpdatedAt(source.getUpdatedAt());
+                .customerId(source.getCustomerId())
+                .vehicleId(source.getVehicleId())
+                .dealershipId(source.getDealershipId())
+                .serviceTypeId(source.getServiceTypeId())
+                .technicianId(source.getTechnicianId())
+                .serviceBayId(source.getServiceBayId())
 
-        // Appointment properties
-        target.setCustomerId(source.getCustomerId());
-        target.setVehicleId(source.getVehicleId());
-        target.setDealershipId(source.getDealershipId());
-        target.setServiceTypeId(source.getServiceTypeId());
-        target.setTechnicianId(source.getTechnicianId());
-        target.setServiceBayId(source.getServiceBayId());
-        target.setStartTime(source.getStartTime());
-        target.setEndTime(source.getEndTime());
-        target.setStatus(source.getStatus());
-        target.setVersion(source.getVersion());
-        target.setCancellationReason(source.getCancellationReason());
+                .startTime(source.getStartTime())
+                .endTime(source.getEndTime())
 
-        return target;
+                .status(source.getStatus())
+                .version(source.getVersion())
+                .cancellationReason(source.getCancellationReason())
+                .build();
     }
 
     @Override
     protected AppointmentJpaEntity toPersistence(Appointment source) {
+
         if (source == null) {
             return null;
         }
 
-        AppointmentJpaEntity target = new AppointmentJpaEntity();
+        return AppointmentJpaEntity.builder()
+                .id(source.getId())
+                .deleted(source.getIsDeleted())
 
-        // Inherited properties
-        target.setId(source.getId());
-        target.setDeleted(source.getIsDeleted());
-        target.setCreatedAt(source.getCreatedAt());
-        target.setUpdatedAt(source.getUpdatedAt());
+                .customerId(source.getCustomerId())
+                .vehicleId(source.getVehicleId())
+                .dealershipId(source.getDealershipId())
+                .serviceTypeId(source.getServiceTypeId())
+                .technicianId(source.getTechnicianId())
+                .serviceBayId(source.getServiceBayId())
 
-        // Appointment properties
-        target.setCustomerId(source.getCustomerId());
-        target.setVehicleId(source.getVehicleId());
-        target.setDealershipId(source.getDealershipId());
-        target.setServiceTypeId(source.getServiceTypeId());
-        target.setTechnicianId(source.getTechnicianId());
-        target.setServiceBayId(source.getServiceBayId());
-        target.setStartTime(source.getStartTime());
-        target.setEndTime(source.getEndTime());
-        target.setStatus(source.getStatus());
-        target.setVersion(source.getVersion());
-        target.setCancellationReason(source.getCancellationReason());
+                .startTime(source.getStartTime())
+                .endTime(source.getEndTime())
 
-        return target;
+                .status(source.getStatus())
+                .version(source.getVersion())
+                .cancellationReason(source.getCancellationReason())
+                .build();
     }
 }

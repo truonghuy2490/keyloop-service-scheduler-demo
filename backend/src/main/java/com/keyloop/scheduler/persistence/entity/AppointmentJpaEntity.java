@@ -1,15 +1,19 @@
 package com.keyloop.scheduler.persistence.entity;
 
+import com.keyloop.scheduler.persistence.entity.common.SoftDeletedAuditableJpaEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.util.UUID;
-import java.time.Instant;
 import jakarta.persistence.Version;
+
+import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "appointment")
 public class AppointmentJpaEntity extends SoftDeletedAuditableJpaEntity {
+
     @Column(name = "customer_id", nullable = false)
     private UUID customerId;
 
@@ -44,39 +48,154 @@ public class AppointmentJpaEntity extends SoftDeletedAuditableJpaEntity {
     @Column(name = "cancellation_reason", length = 500)
     private String cancellationReason;
 
-    public AppointmentJpaEntity() {}
+    protected AppointmentJpaEntity() {
+    }
 
-    public UUID getCustomerId() { return customerId; }
-    public void setCustomerId(UUID customerId) { this.customerId = customerId; }
+    private AppointmentJpaEntity(Builder builder) {
+        super(builder);
 
-    public UUID getVehicleId() { return vehicleId; }
-    public void setVehicleId(UUID vehicleId) { this.vehicleId = vehicleId; }
+        this.customerId = builder.customerId;
+        this.vehicleId = builder.vehicleId;
+        this.dealershipId = builder.dealershipId;
+        this.serviceTypeId = builder.serviceTypeId;
+        this.technicianId = builder.technicianId;
+        this.serviceBayId = builder.serviceBayId;
 
-    public UUID getDealershipId() { return dealershipId; }
-    public void setDealershipId(UUID dealershipId) { this.dealershipId = dealershipId; }
+        this.startTime = builder.startTime;
+        this.endTime = builder.endTime;
 
-    public UUID getServiceTypeId() { return serviceTypeId; }
-    public void setServiceTypeId(UUID serviceTypeId) { this.serviceTypeId = serviceTypeId; }
+        this.status = builder.status;
+        this.version = builder.version;
+        this.cancellationReason = builder.cancellationReason;
+    }
 
-    public UUID getTechnicianId() { return technicianId; }
-    public void setTechnicianId(UUID technicianId) { this.technicianId = technicianId; }
+    public static Builder builder() {
+        return new Builder();
+    }
 
-    public UUID getServiceBayId() { return serviceBayId; }
-    public void setServiceBayId(UUID serviceBayId) { this.serviceBayId = serviceBayId; }
+    public static class Builder
+            extends SoftDeletedAuditableJpaEntity.Builder<Builder> {
 
-    public Instant getStartTime() { return startTime; }
-    public void setStartTime(Instant startTime) { this.startTime = startTime; }
+        private UUID customerId;
+        private UUID vehicleId;
+        private UUID dealershipId;
+        private UUID serviceTypeId;
+        private UUID technicianId;
+        private UUID serviceBayId;
 
-    public Instant getEndTime() { return endTime; }
-    public void setEndTime(Instant endTime) { this.endTime = endTime; }
+        private Instant startTime;
+        private Instant endTime;
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+        private String status;
+        private Long version;
+        private String cancellationReason;
 
-    public Long getVersion() { return version; }
-    public void setVersion(Long version) { this.version = version; }
+        public Builder customerId(UUID customerId) {
+            this.customerId = customerId;
+            return this;
+        }
 
-    public String getCancellationReason() { return cancellationReason; }
-    public void setCancellationReason(String cancellationReason) { this.cancellationReason = cancellationReason; }
+        public Builder vehicleId(UUID vehicleId) {
+            this.vehicleId = vehicleId;
+            return this;
+        }
 
+        public Builder dealershipId(UUID dealershipId) {
+            this.dealershipId = dealershipId;
+            return this;
+        }
+
+        public Builder serviceTypeId(UUID serviceTypeId) {
+            this.serviceTypeId = serviceTypeId;
+            return this;
+        }
+
+        public Builder technicianId(UUID technicianId) {
+            this.technicianId = technicianId;
+            return this;
+        }
+
+        public Builder serviceBayId(UUID serviceBayId) {
+            this.serviceBayId = serviceBayId;
+            return this;
+        }
+
+        public Builder startTime(Instant startTime) {
+            this.startTime = startTime;
+            return this;
+        }
+
+        public Builder endTime(Instant endTime) {
+            this.endTime = endTime;
+            return this;
+        }
+
+        public Builder status(String status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder version(Long version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder cancellationReason(String cancellationReason) {
+            this.cancellationReason = cancellationReason;
+            return this;
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+
+        public AppointmentJpaEntity build() {
+            return new AppointmentJpaEntity(this);
+        }
+    }
+
+    public UUID getCustomerId() {
+        return customerId;
+    }
+
+    public UUID getVehicleId() {
+        return vehicleId;
+    }
+
+    public UUID getDealershipId() {
+        return dealershipId;
+    }
+
+    public UUID getServiceTypeId() {
+        return serviceTypeId;
+    }
+
+    public UUID getTechnicianId() {
+        return technicianId;
+    }
+
+    public UUID getServiceBayId() {
+        return serviceBayId;
+    }
+
+    public Instant getStartTime() {
+        return startTime;
+    }
+
+    public Instant getEndTime() {
+        return endTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
 }

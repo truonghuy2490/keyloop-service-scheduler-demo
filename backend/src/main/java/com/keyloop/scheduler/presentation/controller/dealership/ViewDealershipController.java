@@ -13,11 +13,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.keyloop.scheduler.application.common.result.Result;
 import com.keyloop.scheduler.application.usecase.dealership.viewdealership.Handler;
 import com.keyloop.scheduler.application.usecase.dealership.viewdealership.Query;
-import com.keyloop.scheduler.application.usecase.dealership.viewdealership.Response;
-import com.keyloop.scheduler.application.common.pagination.PagedList;
 import com.keyloop.scheduler.presentation.utility.ErrorOrExtensions;
 
 @RestController
