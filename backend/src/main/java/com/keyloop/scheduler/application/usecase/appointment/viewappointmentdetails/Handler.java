@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class Handler {
 
     public Handler(
             BaseRepository<Appointment, UUID> appointmentRepository,
-            Validators validators
+             @Qualifier("appointmentDetailsValidator") Validators validators
     ) {
         this.appointmentRepository = appointmentRepository;
         this.validators = validators;

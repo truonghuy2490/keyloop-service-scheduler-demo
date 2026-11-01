@@ -1,5 +1,5 @@
 package com.keyloop.scheduler.application.usecase.dealership.viewdealershipdetails;
-        
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -7,15 +7,16 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.keyloop.scheduler.application.abstraction.dataaccess.BaseRepository;
+import com.keyloop.scheduler.application.abstraction.dataaccess.DealershipRepository;
 import com.keyloop.scheduler.application.common.result.Error;
 import com.keyloop.scheduler.application.common.result.ErrorDetails;
 import com.keyloop.scheduler.application.common.result.Result;
-import com.keyloop.scheduler.domain.entity.Dealership;
+import com.keyloop.scheduler.application.abstraction.dataaccess.DealershipRepository.DealershipDetailsData;
 
 @Service("viewDealershipDetailsHandler")
 public class Handler {
@@ -23,12 +24,12 @@ public class Handler {
     private static final Logger logger =
             LoggerFactory.getLogger(Handler.class);
 
-    private final BaseRepository<Dealership, UUID> dealershipRepository;
+    private final DealershipRepository dealershipRepository;
     private final Validators validators;
 
     public Handler(
-            BaseRepository<Dealership, UUID> dealershipRepository,
-            Validators validators
+            DealershipRepository dealershipRepository,
+            @Qualifier("dealershipDetailsValidator") Validators validators
     ) {
         this.dealershipRepository = dealershipRepository;
         this.validators = validators;
@@ -52,20 +53,21 @@ public class Handler {
         UUID dealershipId = UUID.fromString(request.dealershipId());
 
         logger.debug(
-                "Retrieving dealership with ID: {}",
+                "Retrieving dealership details with ID: {}",
                 dealershipId
         );
 
-        // 3. Retrieve dealership
-        Optional<Dealership> dealership;
+        // 3. Retrieve dealership details
+        Optional<DealershipDetailsData> dealershipDetails;
 
         try {
-            dealership = dealershipRepository.findById(dealershipId);
+            dealershipDetails =
+                    dealershipRepository.findDetailsById(dealershipId);
 
         } catch (DataAccessException ex) {
 
             logger.error(
-                    "Failed to retrieve dealership with ID: {}",
+                    "Failed to retrieve dealership details with ID: {}",
                     dealershipId,
                     ex
             );
@@ -80,7 +82,7 @@ public class Handler {
         }
 
         // 4. Check whether dealership exists
-        if (dealership.isEmpty()) {
+        if (dealershipDetails.isEmpty()) {
 
             logger.warn(
                     "Dealership not found with ID: {}",
@@ -96,11 +98,11 @@ public class Handler {
             );
         }
 
-        // 5. Map Domain to Response
-        Response response = Response.from(dealership.get());
+        // 5. Map read model to Response
+        Response response = Response.from(dealershipDetails.get());
 
         logger.info(
-                "Successfully retrieved dealership with ID: {}",
+                "Successfully retrieved dealership details with ID: {}",
                 dealershipId
         );
 

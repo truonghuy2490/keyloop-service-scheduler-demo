@@ -72,3 +72,9 @@ public class ViewAppointmentByIdController {
         return ErrorOrExtensions.toResponse(result);
     }
 }
+// optimistic lock
+// permisstic lock
+// @Transaction 
+// isolation in spring boot
+// @Builder 
+// proxy pattern

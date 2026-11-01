@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.keyloop.scheduler.persistence.entity.common.CreatedAtJpaEntity;
+
 @Entity
 @Table(name = "appointment_audit_log")
 public class AppointmentAuditLogJpaEntity extends CreatedAtJpaEntity {

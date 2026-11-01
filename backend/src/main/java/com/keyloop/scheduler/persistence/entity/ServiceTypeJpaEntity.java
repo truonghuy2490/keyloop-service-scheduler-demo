@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.UUID;
 
+import com.keyloop.scheduler.persistence.entity.common.SoftDeletedAuditableJpaEntity;
+
 @Entity
 @Table(name = "service_type")
 public class ServiceTypeJpaEntity extends SoftDeletedAuditableJpaEntity {

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.keyloop.scheduler.application.common.result.Error;
 
-@Component
+@Component("appointmentDetailsValidator")
 public class Validators {
 
     public List<Error> validate(Query query) {

@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.UUID;
+
+import com.keyloop.scheduler.persistence.entity.common.SoftDeletedAuditableJpaEntity;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 

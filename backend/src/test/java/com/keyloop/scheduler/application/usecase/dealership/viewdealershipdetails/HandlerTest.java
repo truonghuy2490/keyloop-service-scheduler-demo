@@ -3,6 +3,10 @@ package com.keyloop.scheduler.application.usecase.dealership.viewdealershipdetai
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,21 +17,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessResourceFailureException;
 
-import com.keyloop.scheduler.application.abstraction.dataaccess.BaseRepository;
+import com.keyloop.scheduler.application.abstraction.dataaccess.DealershipRepository;
+import com.keyloop.scheduler.application.abstraction.dataaccess.DealershipRepository.DealershipDetailsData;
 import com.keyloop.scheduler.application.common.result.Error;
 import com.keyloop.scheduler.application.common.result.Result;
-import com.keyloop.scheduler.application.usecase.dealership.viewdealershipdetails.Errors;
-import com.keyloop.scheduler.application.usecase.dealership.viewdealershipdetails.Handler;
-import com.keyloop.scheduler.application.usecase.dealership.viewdealershipdetails.Query;
-import com.keyloop.scheduler.application.usecase.dealership.viewdealershipdetails.Response;
-import com.keyloop.scheduler.application.usecase.dealership.viewdealershipdetails.Validators;
-import com.keyloop.scheduler.domain.entity.Dealership;
 
 @ExtendWith(MockitoExtension.class)
 class HandlerTest {
 
     @Mock
-    private BaseRepository<Dealership, UUID> dealershipRepository;
+    private DealershipRepository dealershipRepository;
 
     private Handler handler;
 
@@ -49,14 +48,10 @@ class HandlerTest {
 
         Query query = new Query(dealershipId.toString());
 
-        Dealership dealership = mock(Dealership.class);
+        DealershipDetailsData details = createDealershipDetails(dealershipId);
 
-        when(dealership.getId()).thenReturn(dealershipId);
-        when(dealership.getName()).thenReturn("Keyloop HCMC Central");
-        when(dealership.getTimeZone()).thenReturn("Asia/Ho_Chi_Minh");
-
-        when(dealershipRepository.findById(dealershipId))
-                .thenReturn(Optional.of(dealership));
+        when(dealershipRepository.findDetailsById(dealershipId))
+                .thenReturn(Optional.of(details));
 
         // Act
         Result<Response> result = handler.handle(query).join();
@@ -64,16 +59,47 @@ class HandlerTest {
         // Assert
         assertTrue(result.isSuccess());
 
-        Result.Success<?> success =
-                (Result.Success<?>) result;
-
-        Response response = (Response) success.value();
+        Response response = getSuccessValue(result);
 
         assertEquals(dealershipId, response.id());
         assertEquals("Keyloop HCMC Central", response.name());
         assertEquals("Asia/Ho_Chi_Minh", response.timeZone());
 
-        verify(dealershipRepository).findById(dealershipId);
+        // Verify working hours
+        assertEquals(2, response.workingHours().size());
+
+        Response.WorkingHours monday = response.workingHours().get(0);
+
+        assertEquals(DayOfWeek.MONDAY, monday.dayOfWeek());
+        assertFalse(monday.isClosed());
+        assertEquals(LocalTime.of(8, 0), monday.opensAt());
+        assertEquals(LocalTime.of(17, 0), monday.closesAt());
+
+        Response.WorkingHours sunday = response.workingHours().get(1);
+
+        assertEquals(DayOfWeek.SUNDAY, sunday.dayOfWeek());
+        assertTrue(sunday.isClosed());
+
+        // Verify date overrides
+        assertEquals(1, response.dateOverrides().size());
+
+        Response.DateOverride dateOverride =
+                response.dateOverrides().get(0);
+
+        assertEquals(
+                LocalDate.of(2026, 12, 25),
+                dateOverride.businessDate()
+        );
+
+        assertTrue(dateOverride.isClosed());
+        assertEquals("Christmas Holiday", dateOverride.reason());
+
+        // Verify resource summary
+        assertEquals(5, response.resourceSummary().serviceBayCount());
+        assertEquals(8, response.resourceSummary().technicianCount());
+        assertEquals(12, response.resourceSummary().serviceCount());
+
+        verify(dealershipRepository).findDetailsById(dealershipId);
         verifyNoMoreInteractions(dealershipRepository);
     }
 
@@ -85,7 +111,7 @@ class HandlerTest {
 
         Query query = new Query(dealershipId.toString());
 
-        when(dealershipRepository.findById(dealershipId))
+        when(dealershipRepository.findDetailsById(dealershipId))
                 .thenReturn(Optional.empty());
 
         // Act
@@ -108,7 +134,7 @@ class HandlerTest {
 
         assertEquals("dealershipId", error.property());
 
-        verify(dealershipRepository).findById(dealershipId);
+        verify(dealershipRepository).findDetailsById(dealershipId);
         verifyNoMoreInteractions(dealershipRepository);
     }
 
@@ -138,7 +164,6 @@ class HandlerTest {
 
         assertEquals("dealershipId", error.property());
 
-        // Repository must not be called when validation fails
         verifyNoInteractions(dealershipRepository);
     }
 
@@ -177,7 +202,7 @@ class HandlerTest {
 
         Query query = new Query(dealershipId.toString());
 
-        when(dealershipRepository.findById(dealershipId))
+        when(dealershipRepository.findDetailsById(dealershipId))
                 .thenThrow(
                         new DataAccessResourceFailureException(
                                 "Database unavailable"
@@ -202,8 +227,62 @@ class HandlerTest {
                 error.type()
         );
 
-        verify(dealershipRepository).findById(dealershipId);
+        verify(dealershipRepository).findDetailsById(dealershipId);
         verifyNoMoreInteractions(dealershipRepository);
+    }
+
+    private DealershipDetailsData createDealershipDetails(UUID dealershipId) {
+
+        List<DealershipRepository.WorkingHoursData> workingHours = List.of(
+                new DealershipRepository.WorkingHoursData(
+                        DayOfWeek.MONDAY,
+                        false,
+                        LocalTime.of(8, 0),
+                        LocalTime.of(17, 0)
+                ),
+                new DealershipRepository.WorkingHoursData(
+                        DayOfWeek.SUNDAY,
+                        true,
+                        null,
+                        null
+                )
+        );
+
+        List<DealershipRepository.DateOverrideData> dateOverrides = List.of(
+                new DealershipRepository.DateOverrideData(
+                        LocalDate.of(2026, 12, 25),
+                        true,
+                        null,
+                        null,
+                        "Christmas Holiday"
+                )
+        );
+
+        DealershipRepository.ResourceSummaryData resourceSummary =
+                new DealershipRepository.ResourceSummaryData(
+                        5,
+                        8,
+                        12
+                );
+
+        return new DealershipDetailsData(
+                dealershipId,
+                "Keyloop HCMC Central",
+                "Asia/Ho_Chi_Minh",
+                workingHours,
+                dateOverrides,
+                resourceSummary
+        );
+    }
+
+    private Response getSuccessValue(Result<Response> result) {
+
+        assertTrue(result.isSuccess());
+
+        Result.Success<?> success =
+                (Result.Success<?>) result;
+
+        return (Response) success.value();
     }
 
     private Error getFirstError(Result<Response> result) {
