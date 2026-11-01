@@ -2,10 +2,12 @@ package com.keyloop.scheduler.application.usecase.dealership.viewdealership;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.keyloop.scheduler.application.abstraction.dataaccess.BaseRepository;
@@ -28,66 +30,70 @@ public class Handler {
         this.dealershipRepository = dealershipRepository;
     }
 
-    public Result<PagedList<Response>> handle(Query request) {
+    @Async("applicationTaskExecutor")
+    public CompletableFuture<Result<PagedList<Response>>> handle(Query request) {
 
         logger.debug("Retrieving dealerships.");
 
         int pageNumber = request.pageNumber();
         int pageSize = request.pageSize();
 
-        // 1. Retrieve paginated dealerships
-        PagedList<Dealership> dealerships;
-
         try {
-            dealerships = dealershipRepository.findAll(
+            // 1. Retrieve paginated dealerships
+            PagedList<Dealership> dealerships =
+                    dealershipRepository.findAll(pageNumber, pageSize);
+
+            if (dealerships.items().isEmpty()) {
+                logger.info("No dealerships found.");
+
+                return CompletableFuture.completedFuture(
+                        Result.success(
+                                PagedList.create(
+                                        List.of(),
+                                        dealerships.totalCount(),
+                                        pageNumber,
+                                        pageSize
+                                )
+                        )
+                );
+            }
+
+            // 2. Map Domain to Response
+            List<Response> items = dealerships.items()
+                    .stream()
+                    .map(Response::from)
+                    .toList();
+
+            // 3. Create paginated response
+            PagedList<Response> response = PagedList.create(
+                    items,
+                    dealerships.totalCount(),
                     pageNumber,
                     pageSize
             );
+
+            logger.info(
+                    "Successfully retrieved {} dealerships.",
+                    items.size()
+            );
+
+            return CompletableFuture.completedFuture(
+                    Result.success(response)
+            );
+
         } catch (DataAccessException ex) {
             logger.error(
                     "Failed to retrieve dealerships from database.",
                     ex
             );
 
-            return Result.failure(
-                    new ErrorDetails(
-                            List.of(Errors.DEALERSHIP_RETRIEVAL_FAILED)
+            return CompletableFuture.completedFuture(
+                    Result.failure(
+                            new ErrorDetails(
+                                    List.of(Errors.DEALERSHIP_RETRIEVAL_FAILED)
+                            )
                     )
             );
         }
-
-        if (dealerships.items().isEmpty()) {
-            logger.info("No dealerships found.");
-
-            return Result.success(
-                    PagedList.create(
-                            List.of(),
-                            dealerships.totalCount(),
-                            pageNumber,
-                            pageSize
-                    )
-            );
-        }
-
-        // 2. Map Domain to Response
-        List<Response> items = dealerships.items()
-                .stream()
-                .map(Response::from)
-                .toList();
-
-        // 3. Return paginated response
-        PagedList<Response> response = PagedList.create(
-                items,
-                dealerships.totalCount(),
-                pageNumber,
-                pageSize
-        );
-
-        logger.info(
-                "Successfully retrieved {} dealerships.",
-                items.size()
-        );
-
-        return Result.success(response);
     }
 }

@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -59,15 +61,14 @@ public class ViewDealershipController {
             schema = @Schema(implementation = ProblemDetail.class)
         )
     )
-    public ResponseEntity<Object> getDealerships(
+    public CompletableFuture<ResponseEntity<Object>> getDealerships(
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
 
         Query query = new Query(pageNumber, pageSize);
 
-        Result<PagedList<Response>> result = handler.handle(query);
-
-        return ErrorOrExtensions.toResponse(result);
+        return handler.handle(query)
+                .thenApply(ErrorOrExtensions::toResponse);
     }
 }

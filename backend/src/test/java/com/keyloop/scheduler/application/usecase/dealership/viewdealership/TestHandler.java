@@ -1,3 +1,4 @@
+
 package com.keyloop.scheduler.application.usecase.dealership.viewdealership;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,7 +62,8 @@ class TestHandler {
                 .thenReturn(pagedDealerships);
 
         // Act
-        Result<PagedList<Response>> result = handler.handle(query);
+        Result<PagedList<Response>> result =
+                handler.handle(query).join();
 
         // Assert
         assertTrue(result.isSuccess());
@@ -103,7 +105,8 @@ class TestHandler {
                 .thenReturn(emptyDealerships);
 
         // Act
-        Result<PagedList<Response>> result = handler.handle(query);
+        Result<PagedList<Response>> result =
+                handler.handle(query).join();
 
         // Assert
         assertTrue(result.isSuccess());
@@ -146,7 +149,8 @@ class TestHandler {
                 .thenReturn(emptyPage);
 
         // Act
-        Result<PagedList<Response>> result = handler.handle(query);
+        Result<PagedList<Response>> result =
+                handler.handle(query).join();
 
         // Assert
         assertTrue(result.isSuccess());
@@ -187,7 +191,8 @@ class TestHandler {
                 );
 
         // Act
-        Result<PagedList<Response>> result = handler.handle(query);
+        Result<PagedList<Response>> result =
+                handler.handle(query).join();
 
         // Assert
         assertTrue(result.isFailure());
