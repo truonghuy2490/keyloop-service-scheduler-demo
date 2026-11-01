@@ -2,7 +2,6 @@ package com.keyloop.scheduler.domain.entity;
 
 import com.keyloop.scheduler.domain.common.CreatedAtEntity;
 
-import java.time.Instant;
 import java.util.UUID;
 
 public class AppointmentAuditLog extends CreatedAtEntity {

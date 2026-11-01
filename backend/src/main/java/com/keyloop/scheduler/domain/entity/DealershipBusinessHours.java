@@ -1,8 +1,6 @@
 package com.keyloop.scheduler.domain.entity;
 
 import com.keyloop.scheduler.domain.common.SoftDeletableCreatedEntity;
-
-import java.time.Instant;
 import java.time.LocalTime;
 import java.util.UUID;
 
