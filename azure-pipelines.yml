@@ -1,0 +1,168 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - backend/*
+      - backend/**/*
+      - azure-pipelines.yml
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  # STAGE 1: CI - BUILD AND TEST BACKEND
+  - stage: Build
+    displayName: Build Backend
+
+    jobs:
+      - job: BuildBackend
+        displayName: Build and Test Spring Boot
+
+        steps:
+          - checkout: self
+
+          # Setup Java 21
+          - task: JavaToolInstaller@0
+            displayName: Set up Java 21
+            inputs:
+              versionSpec: '21'
+              jdkArchitectureOption: x64
+              jdkSourceOption: PreInstalled
+
+          # Run Maven build, unit tests and JaCoCo check
+          - script: |
+              java -version
+              chmod +x mvnw
+              ./mvnw --batch-mode --no-transfer-progress clean verify
+            workingDirectory: backend
+            displayName: Run Maven Build and Tests
+
+          # Verify generated Spring Boot JAR
+          - script: |
+              echo "=== Backend target directory ==="
+              ls -lah target
+
+              echo "=== Generated JAR files ==="
+              find target -maxdepth 1 -type f -name '*.jar' -print
+            workingDirectory: backend
+            displayName: Verify Spring Boot JAR
+
+          # Prepare JAR artifact
+          - script: |
+              set -eu
+
+              mkdir -p "$(Build.ArtifactStagingDirectory)/backend"
+
+              JAR_FILE=$(find target -maxdepth 1 -type f \
+                -name '*.jar' ! -name '*.original' | head -n 1)
+
+              if [ -z "$JAR_FILE" ]; then
+                echo "ERROR: Spring Boot JAR not found."
+                exit 1
+              fi
+
+              cp "$JAR_FILE" \
+                "$(Build.ArtifactStagingDirectory)/backend/app.jar"
+
+              echo "Artifact prepared successfully."
+              ls -lh "$(Build.ArtifactStagingDirectory)/backend"
+            workingDirectory: backend
+            displayName: Prepare Backend Artifact
+
+          # Publish JAR artifact
+          - task: PublishPipelineArtifact@1
+            displayName: Publish Backend Artifact
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/backend'
+              artifact: backend-package
+              publishLocation: pipeline
+
+  # STAGE 2: CD - SIMULATE AZURE APP SERVICE
+  - stage: MockDeploy
+    displayName: Simulate Azure Deployment
+    dependsOn: Build
+    condition: succeeded()
+
+    jobs:
+      - job: DeploySimulation
+        displayName: Simulate Azure App Service Creation
+
+        steps:
+          # Download artifact from Build stage
+          - download: current
+            artifact: backend-package
+
+          # Simulate Azure Portal resource creation and deployment
+          - script: |
+              set -eu
+
+              ARTIFACT_DIR="$(Pipeline.Workspace)/backend-package"
+              JAR_FILE="$ARTIFACT_DIR/app.jar"
+
+              echo "=========================================="
+              echo "    AZURE APP SERVICE DEPLOYMENT"
+              echo "          SIMULATION MODE"
+              echo "=========================================="
+
+              # Step 1: Validate artifact
+              echo ""
+              echo "[1/5] Validating deployment package..."
+
+              if [ ! -s "$JAR_FILE" ]; then
+                echo "ERROR: Backend JAR not found or empty."
+                exit 1
+              fi
+
+              ls -lh "$JAR_FILE"
+              echo "Artifact validation successful."
+
+              # Step 2: Simulate creating Resource Group
+              echo ""
+              echo "[2/5] Creating Azure Resource Group..."
+              echo "Resource Group: rg-keyloop-scheduler-dev"
+              echo "Region: Southeast Asia"
+              echo "Status: Simulated"
+
+              # Step 3: Simulate creating App Service Plan
+              echo ""
+              echo "[3/5] Creating Azure App Service Plan..."
+              echo "Plan Name: asp-keyloop-scheduler"
+              echo "Operating System: Linux"
+              echo "Pricing Tier: Free / F1 (example)"
+              echo "Status: Simulated"
+
+              # Step 4: Simulate creating Web App
+              echo ""
+              echo "[4/5] Creating Azure App Service..."
+              echo "App Name: keyloop-scheduler-api"
+              echo "Runtime Stack: Java 21"
+              echo "Web Server: Embedded Spring Boot"
+              echo "Status: Simulated"
+
+              # Step 5: Simulate application deployment
+              echo ""
+              echo "[5/5] Deploying Spring Boot application..."
+              echo "Uploading app.jar..."
+              echo "Starting application..."
+              echo "Checking application deployment..."
+
+              echo ""
+              echo "=========================================="
+              echo "    DEPLOYMENT SIMULATION SUCCESSFUL"
+              echo "=========================================="
+              echo "Application: Keyloop Service Scheduler"
+              echo "Resource Group: rg-keyloop-scheduler-dev"
+              echo "App Service: keyloop-scheduler-api"
+              echo "Runtime: Java 21"
+              echo "Deployment Status: SUCCESS"
+              echo ""
+              echo "NOTE: No actual Azure resources were created."
+            displayName: Simulate Azure App Service Deployment
